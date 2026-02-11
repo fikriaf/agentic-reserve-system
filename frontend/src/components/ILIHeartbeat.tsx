@@ -40,7 +40,7 @@ export function ILIHeartbeat({ data, loading }: Props) {
     );
   }
 
-  if (!data) {
+  if (!data || data.value === undefined || data.value === null) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <div className="text-center py-8">
@@ -50,7 +50,7 @@ export function ILIHeartbeat({ data, loading }: Props) {
     );
   }
 
-  const iliValue = data.value;
+  const iliValue = data.value ?? 0;
   const iliColor = iliValue > 600 ? 'text-green-600' : iliValue > 500 ? 'text-yellow-600' : 'text-red-600';
   const iliBgColor = iliValue > 600 ? 'bg-green-50' : iliValue > 500 ? 'bg-yellow-50' : 'bg-red-50';
 
@@ -81,19 +81,19 @@ export function ILIHeartbeat({ data, loading }: Props) {
         <div className="text-center">
           <div className="text-xs text-gray-500 mb-1">Avg Yield</div>
           <div className="text-lg font-semibold text-gray-900">
-            {data.avgYield.toFixed(2)}%
+            {(data.avgYield ?? 0).toFixed(2)}%
           </div>
         </div>
         <div className="text-center">
           <div className="text-xs text-gray-500 mb-1">Volatility</div>
           <div className="text-lg font-semibold text-gray-900">
-            {data.volatility.toFixed(2)}%
+            {(data.volatility ?? 0).toFixed(2)}%
           </div>
         </div>
         <div className="text-center">
           <div className="text-xs text-gray-500 mb-1">TVL</div>
           <div className="text-lg font-semibold text-gray-900">
-            ${(data.tvl / 1e9).toFixed(2)}B
+            ${((data.tvl ?? 0) / 1e9).toFixed(2)}B
           </div>
         </div>
       </div>
