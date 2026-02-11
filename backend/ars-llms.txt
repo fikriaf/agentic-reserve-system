@@ -12,7 +12,7 @@ v1 - All endpoints prefixed with `/api/v1/`
 
 ---
 
-## 🏥 HEALTH & MONITORING
+## HEALTH & MONITORING
 
 ### GET /api/v1/health
 Health check with dependency status
@@ -50,7 +50,7 @@ Detailed SAK integration health
 
 ---
 
-## 📊 ILI (INTERNET LIQUIDITY INDEX)
+## ILI (INTERNET LIQUIDITY INDEX)
 
 ### GET /api/v1/ili/current
 Get current ILI value
@@ -91,7 +91,7 @@ Get ILI historical data
 
 ---
 
-## 💰 ICR (INTERNET CREDIT RATE)
+## ICR (INTERNET CREDIT RATE)
 
 ### GET /api/v1/icr/current
 Get current Internet Credit Rate
@@ -113,7 +113,7 @@ Get current Internet Credit Rate
 
 ---
 
-## 🏦 RESERVE VAULT
+## RESERVE VAULT
 
 ### GET /api/v1/reserve/state
 Get current reserve vault state
@@ -156,7 +156,7 @@ Get rebalance history
 
 ---
 
-## 🤖 AGENTS
+## AGENTS
 
 ### GET /api/v1/agents/:pubkey/fees
 Get agent fee history
@@ -223,7 +223,7 @@ Claim staking rewards
 
 ---
 
-## 🔐 PRIVACY (Phase 1: Shielded Transfers)
+## PRIVACY (Phase 1: Shielded Transfers)
 
 ### POST /api/v1/privacy/stealth-address
 Generate stealth meta-address
@@ -309,7 +309,7 @@ Get transaction history
 
 ---
 
-## 🔐 PRIVACY (Phase 2: MEV Protection)
+## PRIVACY (Phase 2: MEV Protection)
 
 ### POST /api/v1/privacy/commitment
 Create Pedersen commitment
@@ -407,7 +407,7 @@ Get addresses with low privacy scores (<70)
 
 ---
 
-## 🔐 COMPLIANCE (Phase 3: Viewing Keys)
+## COMPLIANCE (Phase 3: Viewing Keys)
 
 ### POST /api/v1/compliance/viewing-key/generate
 Generate master viewing key
@@ -502,7 +502,7 @@ Setup complete viewing key hierarchy
 
 ---
 
-## 💾 MEMORY & ANALYTICS
+## MEMORY & ANALYTICS
 
 ### GET /api/v1/memory/transactions/:walletAddress
 Get transaction history
@@ -540,7 +540,7 @@ Get portfolio analytics
 
 ---
 
-## 📈 METRICS
+## METRICS
 
 ### GET /api/v1/metrics
 Prometheus metrics endpoint
@@ -562,7 +562,7 @@ JSON metrics (debugging)
 
 ---
 
-## 🐌 SLOW QUERIES
+## SLOW QUERIES
 
 ### GET /api/v1/slow-queries/stats
 Get slow query statistics
@@ -576,7 +576,7 @@ Clear slow query history
 
 ---
 
-## 🏛️ GOVERNANCE
+## GOVERNANCE
 
 ### GET /api/v1/proposals
 List proposals
@@ -587,7 +587,7 @@ Get proposal details with votes
 
 ---
 
-## 💵 REVENUE
+## REVENUE
 
 ### GET /api/v1/revenue/current
 Current revenue metrics
@@ -617,7 +617,7 @@ Distribution history
 
 ---
 
-## 🔧 PROGRAMS (Solana Smart Contracts)
+## PROGRAMS (Solana Smart Contracts)
 
 ### GET /api/v1/programs/status
 Check program deployment status
@@ -633,7 +633,7 @@ Get Token mint info from ars_token
 
 ---
 
-## 🔑 AUTHENTICATION
+## AUTHENTICATION
 
 Most endpoints require:
 - API Key in header: `X-API-Key: your-api-key`
@@ -641,7 +641,7 @@ Most endpoints require:
 
 ---
 
-## 📊 REAL DATA SOURCES
+## REAL DATA SOURCES
 
 All external integrations use REAL data (NO MOCK):
 
@@ -651,7 +651,7 @@ All external integrations use REAL data (NO MOCK):
 
 ---
 
-## 🚀 RATE LIMITS
+## RATE LIMITS
 
 - Default: 100 requests/minute per IP
 - Memory endpoints: 50 requests/minute
@@ -659,7 +659,7 @@ All external integrations use REAL data (NO MOCK):
 
 ---
 
-## 📝 NOTES
+## NOTES
 
 - All timestamps in ISO 8601 format
 - All amounts in base units (lamports for SOL, smallest unit for tokens)
