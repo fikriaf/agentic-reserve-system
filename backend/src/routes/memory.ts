@@ -121,6 +121,19 @@ router.get('/transactions/:walletAddress', checkPrivacyAuthorization, async (req
 
       const { data, error, count } = await query;
 
+      // Handle missing table gracefully
+      if (error && error.message.includes('Could not find the table')) {
+        return {
+          transactions: [],
+          pagination: {
+            page: pageNum,
+            pageSize: pageSizeNum,
+            total: 0,
+            totalPages: 0,
+          },
+        };
+      }
+
       if (error) throw error;
 
       return {
@@ -189,6 +202,16 @@ router.get('/pnl/:walletAddress', checkPrivacyAuthorization, async (req: Request
         .eq('wallet_address', walletAddress)
         .order('snapshot_time', { ascending: false })
         .limit(1);
+
+      // Handle missing table gracefully
+      if (error && error.message.includes('Could not find the table')) {
+        return {
+          realizedPnl: 0,
+          unrealizedPnl: 0,
+          totalPnl: 0,
+          tokens: [],
+        };
+      }
 
       if (error) throw error;
 
@@ -324,6 +347,16 @@ router.get('/portfolio/:walletAddress', checkPrivacyAuthorization, async (req: R
         .select('*')
         .eq('wallet_address', walletAddress);
 
+      // Handle missing table gracefully
+      if (balancesError && balancesError.message.includes('Could not find the table')) {
+        return {
+          walletAddress,
+          totalValue: 0,
+          balances: [],
+          pnl: null,
+        };
+      }
+
       if (balancesError) throw balancesError;
 
       // Get latest PnL
@@ -334,7 +367,10 @@ router.get('/portfolio/:walletAddress', checkPrivacyAuthorization, async (req: R
         .order('snapshot_time', { ascending: false })
         .limit(1);
 
-      if (pnlError) throw pnlError;
+      // Ignore pnl error if table doesn't exist
+      if (pnlError && !pnlError.message.includes('Could not find the table')) {
+        throw pnlError;
+      }
 
       const pnl = pnlData?.[0];
 

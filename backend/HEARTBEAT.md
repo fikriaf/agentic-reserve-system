@@ -42,8 +42,8 @@ Reply with a compact JSON object:
 
 ## Status Values
 
-- `ok`: healthy and ready, all core endpoints operational (12/14 endpoints working).
-- `degraded`: temporary issues (ICR endpoint 404, external API slow, cache miss).
+- `ok`: healthy and ready, all core endpoints operational (33/45 endpoints working - 73.3%).
+- `degraded`: temporary issues (ICR endpoint 404, Sipher API disabled, external API slow).
 - `blocked`: cannot proceed (database down, auth failed, missing config).
 
 ## Current Capabilities (Production)
@@ -58,8 +58,10 @@ The backend currently supports:
 
 ## Known Issues (Production)
 
-- `icr-calculation`: ICR endpoint returns 404 (DEGRADED - investigating)
-- `extended-health-check`: SAK service timeout (DEGRADED - non-critical)
+- `icr-endpoint`: ICR endpoint returns 404 - no data in database yet (EXPECTED - needs ICR calculator service)
+- `privacy-endpoints`: 5 endpoints return 503 - Sipher API not configured (EXPECTED - optional feature)
+- `compliance-endpoints`: 3 endpoints return 503 - Sipher API not configured (EXPECTED - optional feature)
+- `programs-state`: 3 endpoints return 404 - Solana programs not initialized (EXPECTED - optional feature)
 
 ## Health Check Endpoints
 
@@ -92,7 +94,8 @@ The backend integrates with:
 - If status is `blocked`, include a brief reason in `lastAction`.
 - If status is `degraded`, specify which capability is affected in `degradedCapabilities` array.
 - Always include timestamp in ISO 8601 format.
-- Current production status: 86% endpoints operational (12/14 working).
+- Current production status: 73.3% endpoints operational (33/45 working).
+- All routes are ENABLED - 404/503 responses are due to missing data or unconfigured services, not disabled routes.
 
 ## Example Responses
 
@@ -103,29 +106,29 @@ The backend integrates with:
   "agentName": "ars-backend-api",
   "time": "2026-02-11T05:30:00Z",
   "version": "1.0.0",
-  "capabilities": ["ili-calculation", "reserve-management", "revenue-tracking", "governance-proposals", "metrics-collection"],
-  "lastAction": "calculated ILI: 11.86 with TVL $1.51B from Kamino SDK",
+  "capabilities": ["ili-calculation", "reserve-management", "revenue-tracking", "governance-proposals", "agent-management", "memory-services", "metrics-collection"],
+  "lastAction": "calculated ILI: 11.49 with TVL $1.50B from Kamino SDK",
   "nextAction": "waiting for next ILI cron job in 4 minutes",
-  "endpointsWorking": 12,
-  "endpointsTotal": 14,
-  "healthRate": "86%"
+  "endpointsWorking": 33,
+  "endpointsTotal": 45,
+  "healthRate": "73.3%"
 }
 ```
 
-### Degraded State (ICR Issue)
+### Degraded State (Optional Services Unconfigured)
 ```json
 {
   "status": "degraded",
   "agentName": "ars-backend-api",
   "time": "2026-02-11T05:30:00Z",
   "version": "1.0.0",
-  "capabilities": ["ili-calculation", "reserve-management", "revenue-tracking", "governance-proposals", "metrics-collection"],
-  "lastAction": "ICR endpoint unavailable (404 Not Found)",
-  "nextAction": "retrying ICR calculation in 1 minute",
-  "degradedCapabilities": ["icr-calculation"],
-  "endpointsWorking": 12,
-  "endpointsTotal": 14,
-  "healthRate": "86%"
+  "capabilities": ["ili-calculation", "reserve-management", "revenue-tracking", "governance-proposals", "agent-management", "memory-services", "metrics-collection"],
+  "lastAction": "privacy endpoints unavailable (Sipher API not configured)",
+  "nextAction": "waiting for Sipher API configuration",
+  "degradedCapabilities": ["privacy-features", "compliance-features"],
+  "endpointsWorking": 33,
+  "endpointsTotal": 45,
+  "healthRate": "73.3%"
 }
 ```
 
@@ -141,7 +144,7 @@ The backend integrates with:
   "nextAction": "waiting for Supabase to be available",
   "blockReason": "Supabase connection timeout after 30s",
   "endpointsWorking": 0,
-  "endpointsTotal": 14,
+  "endpointsTotal": 45,
   "healthRate": "0%"
 }
 ```

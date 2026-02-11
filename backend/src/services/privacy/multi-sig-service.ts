@@ -175,7 +175,8 @@ export class MultiSigService {
       };
 
       // Verify signature is valid
-      const isValid = await this.verifySignature(signature, signer);
+      const message = `approve:${requestId}:${approval.requestType}`;
+      const isValid = await this.verifySignature(signature, signer, message);
       if (!isValid) {
         throw new Error(`Invalid signature from ${signer}`);
       }

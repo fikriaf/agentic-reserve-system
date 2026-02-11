@@ -112,6 +112,13 @@ function getMEVProtectionService(): MEVProtectionService {
  */
 router.post('/stealth-address', async (req: Request, res: Response) => {
   try {
+    if (!config.sipher.enabled) {
+      return res.status(503).json({
+        error: 'Sipher integration is disabled',
+        message: 'Privacy features require Sipher API to be enabled and configured'
+      });
+    }
+
     const { agentId, label } = req.body;
 
     if (!agentId || !label) {
@@ -151,6 +158,13 @@ router.post('/stealth-address', async (req: Request, res: Response) => {
  */
 router.get('/stealth-address/:agentId', async (req: Request, res: Response) => {
   try {
+    if (!config.sipher.enabled) {
+      return res.status(503).json({
+        error: 'Sipher integration is disabled',
+        message: 'Privacy features require Sipher API to be enabled and configured'
+      });
+    }
+
     const { agentId } = req.params;
 
     const stealthManager = getStealthAddressManager();
@@ -196,6 +210,13 @@ router.get('/stealth-address/:agentId', async (req: Request, res: Response) => {
  */
 router.post('/shielded-transfer', async (req: Request, res: Response) => {
   try {
+    if (!config.sipher.enabled) {
+      return res.status(503).json({
+        error: 'Sipher integration is disabled',
+        message: 'Privacy features require Sipher API to be enabled and configured'
+      });
+    }
+
     const { senderId, recipientMetaAddressId, amount, mint } = req.body;
 
     if (!senderId || !recipientMetaAddressId || !amount) {
@@ -293,6 +314,13 @@ router.post('/shielded-transfer/submit', async (req: Request, res: Response) => 
  */
 router.get('/payments/:agentId', async (req: Request, res: Response) => {
   try {
+    if (!config.sipher.enabled) {
+      return res.status(503).json({
+        error: 'Sipher integration is disabled',
+        message: 'Privacy features require Sipher API to be enabled and configured'
+      });
+    }
+
     const { agentId } = req.params;
     const limit = parseInt(req.query.limit as string) || 100;
 
@@ -382,6 +410,13 @@ router.post('/claim', async (req: Request, res: Response) => {
  */
 router.get('/transactions/:agentId', async (req: Request, res: Response) => {
   try {
+    if (!config.sipher.enabled) {
+      return res.status(503).json({
+        error: 'Sipher integration is disabled',
+        message: 'Privacy features require Sipher API to be enabled and configured'
+      });
+    }
+
     const { agentId } = req.params;
     const limit = parseInt(req.query.limit as string) || 100;
 
@@ -452,6 +487,13 @@ router.get('/scanner/stats', async (req: Request, res: Response) => {
  */
 router.post('/commitment', async (req: Request, res: Response) => {
   try {
+    if (!config.sipher.enabled) {
+      return res.status(503).json({
+        error: 'Sipher integration is disabled',
+        message: 'Privacy features require Sipher API to be enabled and configured'
+      });
+    }
+
     const { value } = req.body;
 
     if (!value) {
@@ -593,6 +635,13 @@ router.post('/commitment/add', async (req: Request, res: Response) => {
  */
 router.get('/score/:address', async (req: Request, res: Response) => {
   try {
+    if (!config.sipher.enabled) {
+      return res.status(503).json({
+        error: 'Sipher integration is disabled',
+        message: 'Privacy features require Sipher API to be enabled and configured'
+      });
+    }
+
     const { address } = req.params;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
 

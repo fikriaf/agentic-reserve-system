@@ -81,8 +81,8 @@ export const config = {
   
   sipher: {
     url: process.env.SIPHER_API_URL || 'https://sipher.sip-protocol.org',
-    apiKey: process.env.SIPHER_API_KEY || '',
-    enabled: process.env.SIPHER_ENABLED === 'true',
+    apiKey: process.env.SIPHER_API_KEY || 'dev-key-placeholder',
+    enabled: process.env.SIPHER_ENABLED !== 'false', // Default enabled
     timeout: parseInt(process.env.SIPHER_TIMEOUT || '30000', 10),
   },
   

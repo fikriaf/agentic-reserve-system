@@ -635,9 +635,11 @@ Get Token mint info from ars_token
 
 ## AUTHENTICATION
 
-Most endpoints require:
-- API Key in header: `X-API-Key: your-api-key`
-- Privacy-protected endpoints require: `X-Viewing-Key: viewing-key-hash`
+Current state: NO authentication required (all endpoints publicly accessible)
+
+Planned future implementation:
+- API Key in header: `X-API-Key: your-api-key` (for rate limiting per agent)
+- Privacy-protected endpoints: `X-Viewing-Key: viewing-key-hash` (for viewing encrypted data)
 
 ---
 

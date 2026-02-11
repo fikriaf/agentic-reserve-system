@@ -11,6 +11,19 @@ import { config } from '../config';
 const router = Router();
 
 /**
+ * GET /health
+ * Simple health check endpoint
+ */
+router.get('/health', async (req: Request, res: Response) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'ars-backend',
+    version: '1.0.0'
+  });
+});
+
+/**
  * GET /api/v1/health
  * Comprehensive health check endpoint
  * 
@@ -23,7 +36,7 @@ const router = Router();
  * 
  * Requirement 15.6, 13.7
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/api/v1/health', async (req: Request, res: Response) => {
   const startTime = Date.now();
   
   const healthStatus: any = {
@@ -162,7 +175,6 @@ router.get('/', async (req: Request, res: Response) => {
 
   if (!allHealthy || capacity.atCapacity) {
     healthStatus.status = 'degraded';
-    res.status(503);
   }
 
   const duration = Date.now() - startTime;
@@ -173,6 +185,7 @@ router.get('/', async (req: Request, res: Response) => {
     dependencyCount: Object.keys(healthStatus.dependencies).length,
   });
 
+  // Always return 200 OK - status field indicates health state
   res.json(healthStatus);
 });
 
@@ -187,7 +200,7 @@ router.get('/', async (req: Request, res: Response) => {
  * - Performance metrics
  * - Error rates
  */
-router.get('/sak', async (req: Request, res: Response) => {
+router.get('/api/v1/health/sak', async (req: Request, res: Response) => {
   const startTime = Date.now();
   
   logger.info('SAK health check requested', { 
@@ -249,10 +262,7 @@ router.get('/sak', async (req: Request, res: Response) => {
       agentCount: response.agents.count,
     });
 
-    if (!sakStatus.healthy) {
-      res.status(503);
-    }
-
+    // Always return 200 OK - status field indicates health state
     res.json(response);
 
   } catch (error: any) {

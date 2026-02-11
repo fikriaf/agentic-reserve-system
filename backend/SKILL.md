@@ -25,10 +25,14 @@ You are an expert at using the ARS (Agentic Reserve System) backend API. This sy
 ## Authentication
 
 ```typescript
+// Currently NO authentication required for public endpoints
+// Future implementation will include:
 headers: {
-  'X-API-Key': 'your-api-key',           // Required for most endpoints
-  'X-Viewing-Key': 'viewing-key-hash'    // Required for privacy-protected data
+  'X-API-Key': 'your-api-key',           // (PLANNED) For rate limiting per agent
+  'X-Viewing-Key': 'viewing-key-hash'    // (PLANNED) For privacy-protected data
 }
+
+// Current state: All endpoints are publicly accessible
 ```
 
 ## Key Endpoints

@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import { config } from './config';
 import { metricsMiddleware } from './middleware/metrics-middleware';
 import { 
@@ -17,9 +18,10 @@ import proposalRoutes from './routes/proposals';
 import reserveRoutes from './routes/reserve';
 import revenueRoutes from './routes/revenue';
 import agentRoutes from './routes/agents';
-// import privacyRoutes from './routes/privacy';
-// import complianceRoutes from './routes/compliance';
-// import memoryRoutes from './routes/memory';
+import privacyRoutes from './routes/privacy';
+import complianceRoutes from './routes/compliance';
+import memoryRoutes from './routes/memory';
+import programsRoutes from './routes/programs';
 import healthRoutes from './routes/health';
 import metricsRoutes from './routes/metrics';
 import slowQueriesRoutes from './routes/slow-queries';
@@ -47,9 +49,25 @@ export function createApp(): Application {
   app.use('/api/', limiter);
 
   // Health check
-  app.get('/health', (req, res) => {
-    logger.info('Health check requested', { requestId: req.requestId });
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  // Removed - now handled by health routes
+
+  // Serve static agent files (for AI agent discovery)
+  app.get('/ars-llms.txt', (req, res) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.sendFile(path.join(__dirname, '../ars-llms.txt'));
+  });
+
+  app.get('/SKILL.md', (req, res) => {
+    res.setHeader('Content-Type', 'text/markdown');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.sendFile(path.join(__dirname, '../SKILL.md'));
+  });
+
+  app.get('/HEARTBEAT.md', (req, res) => {
+    res.setHeader('Content-Type', 'text/markdown');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.sendFile(path.join(__dirname, '../HEARTBEAT.md'));
   });
 
   // API routes
@@ -61,26 +79,22 @@ export function createApp(): Application {
   app.use('/api/v1/agents', agentRoutes);
   
   // Privacy routes (Phase 1 & 2: Shielded Transfers, MEV Protection)
-  // TEMPORARILY DISABLED - TypeScript compilation errors
-  // if (config.privacy?.enabled) {
-  //   app.use('/api/v1/privacy', privacyRoutes);
-  // }
+  app.use('/api/v1/privacy', privacyRoutes);
 
   // Compliance routes (Phase 3: Compliance Layer)
-  // TEMPORARILY DISABLED - TypeScript compilation errors
-  // if (config.privacy?.enabled) {
-  //   app.use('/api/v1/compliance', complianceRoutes);
-  // }
+  app.use('/api/v1/compliance', complianceRoutes);
 
   // Memory routes (Solder Cortex integration)
-  // TEMPORARILY DISABLED - TypeScript compilation errors
-  // app.use('/api/v1/memory', memoryRoutes);
+  app.use('/api/v1/memory', memoryRoutes);
+
+  // Programs routes (Solana smart contracts)
+  app.use('/api/v1/programs', programsRoutes);
 
   // Health check routes
-  app.use('/api/v1/health', healthRoutes);
+  app.use('/', healthRoutes);
 
   // Metrics endpoint (Prometheus)
-  app.use('/metrics', metricsRoutes);
+  app.use('/', metricsRoutes);
 
   // Slow queries endpoint
   app.use('/api/v1/slow-queries', slowQueriesRoutes);

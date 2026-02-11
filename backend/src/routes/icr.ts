@@ -26,7 +26,11 @@ router.get('/current', async (req: Request, res: Response) => {
     }
 
     if (!data || data.length === 0) {
-      return res.status(404).json({ error: 'No ICR data available' });
+      // No ICR data in database - return empty response
+      return res.status(404).json({ 
+        error: 'No ICR data available',
+        message: 'ICR calculation has not been performed yet. Please run the ICR calculator service.'
+      });
     }
 
     // Calculate weighted average ICR
