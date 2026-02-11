@@ -1,6 +1,8 @@
 ---
 name: ARS Backend API
+version: 1.0.0
 description: Expert knowledge for interacting with the Agentic Reserve System (ARS) backend API, including real-time oracle data, privacy features, and DeFi integrations.
+url: https://ars-backend-production.up.railway.app
 ---
 
 # ARS Backend API Skill
@@ -17,7 +19,6 @@ You are an expert at using the ARS (Agentic Reserve System) backend API. This sy
 
 ## Base URL
 
-- Development: `http://localhost:4000`
 - Production: `https://ars-backend-production.up.railway.app`
 - All endpoints: `/api/v1/`
 

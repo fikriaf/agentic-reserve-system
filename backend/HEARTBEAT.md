@@ -2,7 +2,7 @@
 name: ars-backend
 version: 1.0.0
 description: Official heartbeat for the ARS Backend API. Reports liveness, capabilities, and current operational status.
-homepage: https://ars-backend-production.up.railway.app
+url: https://ars-backend-production.up.railway.app
 ---
 
 # ARS Backend Agent Heartbeat

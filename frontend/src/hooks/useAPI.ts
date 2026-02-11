@@ -21,7 +21,9 @@ export function useAPI<T = any>(endpoint: string, options?: {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}${endpoint}`);
+      // Add /api/v1 prefix if endpoint doesn't already have it
+      const fullEndpoint = endpoint.startsWith('/api/') ? endpoint : `/api/v1${endpoint}`;
+      const response = await axios.get(`${API_BASE}${fullEndpoint}`);
       setData(response.data);
       setError(null);
     } catch (err) {

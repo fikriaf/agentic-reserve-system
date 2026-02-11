@@ -19,7 +19,7 @@ async function startServer() {
     });
 
     // Initialize services asynchronously (don't block server start)
-    initializeServices().catch(err => {
+    initializeServices(server).catch(err => {
       console.error('⚠️  Service initialization failed (non-fatal):', err.message);
     });
 
@@ -40,7 +40,7 @@ async function startServer() {
   }
 }
 
-async function initializeServices() {
+async function initializeServices(server: http.Server) {
   try {
     // Initialize SAK service
     if (config.sak.enabled) {
@@ -55,9 +55,9 @@ async function initializeServices() {
       console.log('⚠️  SAK integration is disabled');
     }
 
-    // Initialize WebSocket service
+    // Initialize WebSocket service with the actual HTTP server
     try {
-      const wsService = new WebSocketService(http.createServer());
+      const wsService = new WebSocketService(server);
       console.log('✅ WebSocket service initialized');
     } catch (err: any) {
       console.error('⚠️  WebSocket initialization failed:', err.message);
