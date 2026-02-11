@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync } from 'crypto';
 
 /**
@@ -122,7 +123,7 @@ export class EncryptionService {
       const key = this.deriveKey(agentPublicKey, salt);
 
       // Create cipher
-      const cipher = createCipheriv(this.config.algorithm, key, iv);
+      const cipher = createCipheriv(this.config.algorithm, key, iv) as crypto.CipherGCM;
 
       // Encrypt data
       let encrypted = cipher.update(plaintext, 'utf8', 'hex');
@@ -161,7 +162,7 @@ export class EncryptionService {
       const key = this.deriveKey(agentPublicKey, salt);
 
       // Create decipher
-      const decipher = createDecipheriv(this.config.algorithm, key, iv);
+      const decipher = createDecipheriv(this.config.algorithm, key, iv) as crypto.DecipherGCM;
       decipher.setAuthTag(tag);
 
       // Decrypt data

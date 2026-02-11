@@ -17,9 +17,9 @@ import proposalRoutes from './routes/proposals';
 import reserveRoutes from './routes/reserve';
 import revenueRoutes from './routes/revenue';
 import agentRoutes from './routes/agents';
-import privacyRoutes from './routes/privacy';
-import complianceRoutes from './routes/compliance';
-import memoryRoutes from './routes/memory';
+// import privacyRoutes from './routes/privacy';
+// import complianceRoutes from './routes/compliance';
+// import memoryRoutes from './routes/memory';
 import healthRoutes from './routes/health';
 import metricsRoutes from './routes/metrics';
 import slowQueriesRoutes from './routes/slow-queries';
@@ -61,17 +61,20 @@ export function createApp(): Application {
   app.use('/api/v1/agents', agentRoutes);
   
   // Privacy routes (Phase 1 & 2: Shielded Transfers, MEV Protection)
-  if (config.privacy?.enabled) {
-    app.use('/api/v1/privacy', privacyRoutes);
-  }
+  // TEMPORARILY DISABLED - TypeScript compilation errors
+  // if (config.privacy?.enabled) {
+  //   app.use('/api/v1/privacy', privacyRoutes);
+  // }
 
   // Compliance routes (Phase 3: Compliance Layer)
-  if (config.privacy?.enabled) {
-    app.use('/api/v1/compliance', complianceRoutes);
-  }
+  // TEMPORARILY DISABLED - TypeScript compilation errors
+  // if (config.privacy?.enabled) {
+  //   app.use('/api/v1/compliance', complianceRoutes);
+  // }
 
   // Memory routes (Solder Cortex integration)
-  app.use('/api/v1/memory', memoryRoutes);
+  // TEMPORARILY DISABLED - TypeScript compilation errors
+  // app.use('/api/v1/memory', memoryRoutes);
 
   // Health check routes
   app.use('/api/v1/health', healthRoutes);

@@ -12,7 +12,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SipherClient } from './sipher/sipher-client';
 import { CommitmentManager, CommitmentRecord } from './commitment-manager';
-import { StealthAddressManager } from './stealth/stealth-address-manager';
+import { StealthAddressManager } from './stealth-address-manager';
 import { PrivacyScoreAnalyzer } from './privacy-score-analyzer';
 import { JupiterClient } from '../defi/jupiter-client';
 import { StealthAddress } from './types';

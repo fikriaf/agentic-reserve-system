@@ -178,9 +178,10 @@ export class DisclosureService {
       });
 
       // Call Sipher API to decrypt data with viewing key
+      const encryptedData = typeof encrypted === 'string' ? JSON.parse(encrypted) : encrypted;
       const decrypted = await this.sipherClient.decrypt({
         viewingKey,
-        encrypted
+        encrypted: encryptedData
       });
 
       // Log successful decryption
@@ -283,7 +284,7 @@ export class DisclosureService {
       await this.logDisclosureEvent({
         type: 'revocation',
         disclosureId,
-        timestamp: new Date()
+        timestamp: new Date().toISOString()
       });
 
       logger.info(`Disclosure revoked: ${disclosureId}`);

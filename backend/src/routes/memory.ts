@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../services/supabase';
-import { redisClient } from '../services/redis';
+import { getUpstashRedis } from '../services/upstash-redis';
 import crypto from 'crypto';
 import { checkPrivacyAuthorization } from '../middleware/privacy-auth';
 import { queryRateLimit } from '../middleware/query-rate-limit';
@@ -32,16 +32,21 @@ async function cacheFirst<T>(
 ): Promise<T> {
   try {
     // Check cache
-    const cached = await redisClient.get(cacheKey);
-    if (cached) {
-      return JSON.parse(cached);
+    const redisClient = getUpstashRedis();
+    if (redisClient) {
+      const cached = await redisClient.get(cacheKey);
+      if (cached) {
+        return (typeof cached === 'string' ? JSON.parse(cached) : cached) as T;
+      }
     }
 
     // Cache miss - query database
     const result = await queryFn();
 
     // Store in cache
-    await redisClient.setex(cacheKey, CACHE_TTL, JSON.stringify(result));
+    if (redisClient) {
+      await redisClient.setex(cacheKey, CACHE_TTL, JSON.stringify(result));
+    }
 
     return result;
   } catch (error) {

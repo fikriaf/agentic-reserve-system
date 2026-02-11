@@ -221,7 +221,7 @@ export function validateSAKConfiguration(config: SAKConfig): {
   });
   
   if (errors.length > 0) {
-    logger.error('SAK configuration validation errors', { errors: errors.join(', ') });
+    logger.error('SAK configuration validation errors', undefined, { validationErrors: errors.join(', ') });
   }
   
   if (warnings.length > 0) {

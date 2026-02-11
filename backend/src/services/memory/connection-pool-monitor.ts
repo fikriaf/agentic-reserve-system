@@ -8,7 +8,7 @@
  */
 
 import { supabase } from '../supabase';
-import { redisClient } from '../redis';
+import { getUpstashRedis } from '../upstash-redis';
 import { updateConnectionMetrics } from '../../middleware/capacity-check';
 import { metricsService } from './metrics';
 import { config } from '../../config';
@@ -100,9 +100,12 @@ async function monitorPools(): Promise<void> {
     // Check Redis connection health
     const redisStart = Date.now();
     try {
-      await redisClient.ping();
-      const redisDuration = Date.now() - redisStart;
-      metricsService.observeHistogram('memory_redis_ping_duration_seconds', redisDuration / 1000);
+      const redisClient = getUpstashRedis();
+      if (redisClient) {
+        await redisClient.ping();
+        const redisDuration = Date.now() - redisStart;
+        metricsService.observeHistogram('memory_redis_ping_duration_seconds', redisDuration / 1000);
+      }
     } catch (error) {
       console.error('Redis health check failed:', error);
       metricsService.incrementCounter('memory_redis_health_check_failures_total', 1);

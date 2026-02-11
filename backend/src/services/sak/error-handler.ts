@@ -50,8 +50,7 @@ export class ErrorHandler {
     recoveryProcedure?: RecoveryProcedure;
   }> {
     try {
-      logger.error('Handling SAK error', {
-        error: error.message,
+      logger.error('Handling SAK error', error, {
         operation: context.operation,
         pluginName: context.pluginName,
         agentId: context.agentId
@@ -115,8 +114,8 @@ export class ErrorHandler {
         };
       }
       
-    } catch (handlingError) {
-      logger.error('Error in error handler', { handlingError });
+    } catch (handlingError: any) {
+      logger.error('Error in error handler', handlingError);
       
       // Fallback to safe defaults
       return {
@@ -157,7 +156,7 @@ export class ErrorHandler {
         
         return result;
         
-      } catch (error) {
+      } catch (error: any) {
         lastError = error as Error;
         
         logger.warn('Operation attempt failed', {
@@ -245,10 +244,9 @@ export class ErrorHandler {
         logger.debug('Queued operation executed successfully', {
           operation: item.context.operationName
         });
-      } catch (error) {
-        logger.error('Queued operation failed', {
-          operation: item.context.operationName,
-          error
+      } catch (error: any) {
+        logger.error('Queued operation failed', error, {
+          operation: item.context.operationName
         });
         
         // Re-queue if appropriate

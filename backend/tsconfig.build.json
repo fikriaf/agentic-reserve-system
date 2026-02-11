@@ -1,0 +1,48 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": false,
+    "noEmitOnError": false
+  },
+  "include": [
+    "src/app.ts",
+    "src/index.ts",
+    "src/config/**/*",
+    "src/middleware/capacity-check.ts",
+    "src/middleware/logging-middleware.ts",
+    "src/middleware/metrics-middleware.ts",
+    "src/middleware/query-rate-limit.ts",
+    "src/routes/health.ts",
+    "src/routes/ili.ts",
+    "src/routes/icr.ts",
+    "src/routes/reserve.ts",
+    "src/routes/agents.ts",
+    "src/routes/proposals.ts",
+    "src/routes/revenue.ts",
+    "src/routes/programs.ts",
+    "src/routes/metrics.ts",
+    "src/routes/slow-queries.ts",
+    "src/cron/**/*",
+    "src/services/supabase.ts",
+    "src/services/upstash-redis.ts",
+    "src/services/sak.ts",
+    "src/services/solana-programs.ts",
+    "src/services/ili-calculator.ts",
+    "src/services/icr-calculator.ts",
+    "src/services/defi/jupiter-client.ts",
+    "src/services/defi/kamino-sdk-client.ts",
+    "src/services/defi/meteora-client.ts",
+    "src/services/defi/magicblock-client.ts",
+    "src/services/memory/logger.ts",
+    "src/services/memory/metrics.ts",
+    "src/services/memory/event-emitter.ts",
+    "src/services/memory/circuit-breaker.ts",
+    "src/services/memory/slow-query-logger.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

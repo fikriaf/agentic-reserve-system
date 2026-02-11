@@ -12,7 +12,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SipherClient } from './sipher/sipher-client';
 import { PrivacyScore } from './types';
-import { getCachedData, setCachedData } from '../redis';
+import { getCachedData, setCachedData } from '../upstash-redis';
 
 /**
  * Simple logger utility

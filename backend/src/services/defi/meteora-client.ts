@@ -57,22 +57,32 @@ export interface MeteoraDLMMPool {
 /**
  * Meteora API Client
  * Provides DLMM pool data, Dynamic Vault APY, and liquidity metrics
+ * API Documentation: https://docs.meteora.ag/api-reference/
  */
 export class MeteoraClient {
   private client: AxiosInstance;
   private cache: Map<string, { data: any; timestamp: number }> = new Map();
   private readonly CACHE_TTL = 60 * 1000; // 60 seconds
+  private readonly apiKey: string;
 
   constructor() {
+    this.apiKey = config.apis.meteoraApiKey || '';
+    
+    // Use the correct Meteora API base URL
     this.client = axios.create({
-      baseURL: config.apis.meteoraApiUrl,
+      baseURL: 'https://dlmm-api.meteora.ag',
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
+        ...(this.apiKey ? { 'Authorization': `Bearer ${this.apiKey}` } : {}),
       },
     });
 
-    console.log('✅ Meteora client initialized');
+    if (this.apiKey) {
+      console.log('✅ Meteora client initialized with API key');
+    } else {
+      console.log('✅ Meteora client initialized (public API, no key required)');
+    }
   }
 
   /**
@@ -87,27 +97,37 @@ export class MeteoraClient {
     }
 
     try {
-      const response = await this.client.get('/pair/all');
-      const pools = response.data.groups.flatMap((group: any) => group.pairs);
+      // Try /pair/all_by_groups first (recommended endpoint)
+      const response = await this.client.get('/pair/all_by_groups');
+      
+      if (!response.data || !response.data.groups) {
+        console.warn('Meteora API returned unexpected format');
+        return [];
+      }
+
+      const pools = response.data.groups.flatMap((group: any) => group.pairs || []);
 
       this.cache.set(cacheKey, { data: pools, timestamp: Date.now() });
       return pools;
-    } catch (error) {
-      console.error('Meteora getDLMMPools error:', error);
-      throw new Error(`Failed to get DLMM pools: ${error}`);
+    } catch (error: any) {
+      console.error('Meteora getDLMMPools error:', error.message);
+      
+      // Return empty array instead of throwing
+      // This allows the app to continue working even if Meteora API is down
+      return [];
     }
   }
 
   /**
    * Get specific DLMM pool by address
    */
-  async getDLMMPool(poolAddress: string): Promise<MeteoraPoolInfo> {
+  async getDLMMPool(poolAddress: string): Promise<MeteoraPoolInfo | null> {
     try {
       const response = await this.client.get(`/pair/${poolAddress}`);
       return response.data;
-    } catch (error) {
-      console.error('Meteora getDLMMPool error:', error);
-      throw new Error(`Failed to get DLMM pool: ${error}`);
+    } catch (error: any) {
+      console.error(`Meteora getDLMMPool error for ${poolAddress}:`, error.message);
+      return null;
     }
   }
 
@@ -123,14 +143,17 @@ export class MeteoraClient {
     }
 
     try {
-      const response = await axios.get('https://dlmm-api.meteora.ag/vault/all');
-      const vaults = response.data;
+      const response = await axios.get('https://dlmm-api.meteora.ag/vault/all', {
+        timeout: 10000,
+      });
+      
+      const vaults = Array.isArray(response.data) ? response.data : [];
 
       this.cache.set(cacheKey, { data: vaults, timestamp: Date.now() });
       return vaults;
-    } catch (error) {
-      console.error('Meteora getDynamicVaults error:', error);
-      throw new Error(`Failed to get Dynamic Vaults: ${error}`);
+    } catch (error: any) {
+      console.error('Meteora getDynamicVaults error:', error.message);
+      return [];
     }
   }
 
@@ -153,8 +176,10 @@ export class MeteoraClient {
   async getPoolTVL(poolAddress: string): Promise<number> {
     try {
       const pool = await this.getDLMMPool(poolAddress);
+      if (!pool) return 0;
+      
       const tvl = parseFloat(pool.liquidity);
-      return tvl;
+      return isNaN(tvl) ? 0 : tvl;
     } catch (error) {
       console.error('Meteora getPoolTVL error:', error);
       return 0;
@@ -167,7 +192,7 @@ export class MeteoraClient {
   async getPoolAPY(poolAddress: string): Promise<number> {
     try {
       const pool = await this.getDLMMPool(poolAddress);
-      return pool.apy;
+      return pool?.apy || 0;
     } catch (error) {
       console.error('Meteora getPoolAPY error:', error);
       return 0;
@@ -180,7 +205,7 @@ export class MeteoraClient {
   async getPool24hVolume(poolAddress: string): Promise<number> {
     try {
       const pool = await this.getDLMMPool(poolAddress);
-      return pool.trade_volume_24h;
+      return pool?.trade_volume_24h || 0;
     } catch (error) {
       console.error('Meteora getPool24hVolume error:', error);
       return 0;
@@ -193,7 +218,7 @@ export class MeteoraClient {
   async getPool24hFees(poolAddress: string): Promise<number> {
     try {
       const pool = await this.getDLMMPool(poolAddress);
-      return pool.fees_24h;
+      return pool?.fees_24h || 0;
     } catch (error) {
       console.error('Meteora getPool24hFees error:', error);
       return 0;

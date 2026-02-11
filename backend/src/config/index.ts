@@ -55,10 +55,20 @@ export const config = {
   
   apis: {
     birdeyeApiKey: process.env.BIRDEYE_API_KEY || '',
+    // Jupiter API
+    jupiterApiKey: process.env.JUPITER_API_KEY || '',
+    jupiterUltraApiUrl: process.env.JUPITER_ULTRA_API_URL || 'https://api.jup.ag/ultra',
     jupiterApiUrl: process.env.JUPITER_API_URL || 'https://quote-api.jup.ag/v6',
+    // Meteora DLMM API
+    meteoraApiKey: process.env.METEORA_API_KEY || '',
     meteoraApiUrl: process.env.METEORA_API_URL || 'https://dlmm-api.meteora.ag',
+    // Kamino Finance (no public REST API - use SDK: @kamino-finance/klend-sdk)
     kaminoApiUrl: process.env.KAMINO_API_URL || 'https://api.kamino.finance',
+    kaminoSdkEnabled: process.env.KAMINO_SDK_ENABLED === 'true',
+    // MagicBlock
     magicRouterUrl: process.env.MAGIC_ROUTER_URL || 'https://router.magicblock.gg',
+    magicBlockApiKey: process.env.MAGICBLOCK_API_KEY || '',
+    // OpenRouter (AI)
     openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
     openRouterReferer: process.env.OPENROUTER_REFERER || 'https://internet-capital-bank.com',
     

@@ -1,5 +1,5 @@
 import { supabase } from '../supabase';
-import { redisClient } from '../redis';
+import { getUpstashRedis } from '../upstash-redis';
 
 interface TokenPosition {
   tokenMint: string;
@@ -285,7 +285,10 @@ export class PnLCalculator {
           });
 
           // Invalidate cache
-          await redisClient.del(`wallet:${registration.address}:pnl:${period}`);
+          const redisClient = getUpstashRedis();
+          if (redisClient) {
+            await redisClient.del(`wallet:${registration.address}:pnl:${period}`);
+          }
         }
 
         console.log(`PnL calculated for wallet: ${registration.address}`);

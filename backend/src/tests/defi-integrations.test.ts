@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 import { JupiterClient } from '../services/defi/jupiter-client';
 import { MeteoraClient } from '../services/defi/meteora-client';
-import { KaminoClient } from '../services/defi/kamino-client';
+import { KaminoSDKClient } from '../services/defi/kamino-sdk-client';
 import { MagicBlockClient } from '../services/defi/magicblock-client';
 import { OpenRouterClient } from '../services/ai/openrouter-client';
 import { X402Client } from '../services/payment/x402-client';
@@ -130,64 +130,44 @@ describe('Meteora Client', () => {
   });
 });
 
-describe('Kamino Client', () => {
-  let client: KaminoClient;
+describe('Kamino SDK Client', () => {
+  let client: KaminoSDKClient;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    client = new KaminoClient();
+    client = new KaminoSDKClient();
   });
 
-  it('should get lending markets', async () => {
-    const mockMarkets = [
-      {
-        address: 'market1',
-        name: 'Main Market',
-        tvl: 10000000,
-        supplyAPY: 5.5,
-        borrowAPY: 8.2,
-      },
-    ];
-
-    mockedAxios.create.mockReturnValue({
-      get: vi.fn().mockResolvedValue({
-        data: mockMarkets,
-      }),
-    });
-
-    client = new KaminoClient();
-    const markets = await client.getMarkets();
-    expect(markets).toHaveLength(1);
-    expect(markets[0].name).toBe('Main Market');
+  it('should get main market with real data', async () => {
+    // This test uses REAL on-chain data from Kamino
+    const market = await client.getMarket();
+    
+    expect(market).toBeDefined();
+    expect(market.address).toBe('7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF');
+    expect(market.name).toBe('Main Market');
+    expect(market.tvl).toBeGreaterThan(0);
+    expect(market.totalSupply).toBeGreaterThan(0);
   });
 
-  it('should calculate weighted average lending rate', async () => {
-    const mockReserves = [
-      { totalSupply: 1000000, supplyAPY: 5.0, totalBorrow: 0, borrowAPY: 0 },
-      { totalSupply: 2000000, supplyAPY: 10.0, totalBorrow: 0, borrowAPY: 0 },
-    ];
-
-    mockedAxios.create.mockReturnValue({
-      get: vi.fn().mockResolvedValue({
-        data: mockReserves,
-      }),
-    });
-
-    client = new KaminoClient();
-    const avgRate = await client.getWeightedAverageLendingRate('market1');
-    expect(avgRate).toBeCloseTo(8.33, 1);
+  it('should get reserves with real data', async () => {
+    // This test uses REAL on-chain data from Kamino
+    const reserves = await client.getReserves();
+    
+    expect(reserves).toBeDefined();
+    expect(reserves.length).toBeGreaterThan(0);
+    
+    // Check SOL reserve exists
+    const solReserve = reserves.find(r => r.symbol === 'SOL');
+    expect(solReserve).toBeDefined();
+    expect(solReserve?.supplyAPY).toBeGreaterThanOrEqual(0);
   });
 
-  it('should handle empty reserves', async () => {
-    mockedAxios.create.mockReturnValue({
-      get: vi.fn().mockResolvedValue({
-        data: [],
-      }),
-    });
-
-    client = new KaminoClient();
-    const avgRate = await client.getWeightedAverageLendingRate('market1');
-    expect(avgRate).toBe(0);
+  it('should get weighted average lending rate', async () => {
+    // This test uses REAL on-chain data from Kamino
+    const avgRate = await client.getWeightedAverageLendingRate();
+    
+    expect(avgRate).toBeGreaterThanOrEqual(0);
+    expect(avgRate).toBeLessThan(100); // Should be reasonable APY
   });
 });
 

@@ -53,10 +53,10 @@ function initializeServices() {
   const encryption = getEncryptionService();
 
   // Initialize viewing key manager
-  initializeViewingKeyManager(sipherClient, supabase, encryption);
+  initializeViewingKeyManager(sipherClient, supabase.raw, encryption);
 
   // Initialize disclosure service
-  initializeDisclosureService(sipherClient, supabase);
+  initializeDisclosureService(sipherClient, supabase.raw);
 
   // Initialize compliance service
   const viewingKeyManager = getViewingKeyManager();
@@ -65,12 +65,12 @@ function initializeServices() {
     sipherClient,
     viewingKeyManager,
     disclosureService,
-    supabase,
+    supabase.raw,
     mockAMLService
   );
 
   // Initialize multi-sig service
-  initializeMultiSigService(supabase);
+  initializeMultiSigService(supabase.raw);
 
   servicesInitialized = true;
 }

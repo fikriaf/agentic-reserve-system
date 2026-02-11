@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { redisClient } from '../services/redis';
+import { getUpstashRedis } from '../services/upstash-redis';
 
 /**
  * Rate limiter for memory query API
@@ -22,9 +22,16 @@ export async function queryRateLimit(
     const windowSeconds = 60; // 1 minute window
     const maxRequests = 100;
 
+    // Skip rate limiting if Redis is not available
+    const redisClient = getUpstashRedis();
+    if (!redisClient) {
+      next();
+      return;
+    }
+
     // Get current request count
     const currentCount = await redisClient.get(rateLimitKey);
-    const count = currentCount ? parseInt(currentCount, 10) : 0;
+    const count: number = currentCount ? (typeof currentCount === 'string' ? parseInt(currentCount, 10) : Number(currentCount)) : 0;
 
     if (count >= maxRequests) {
       // Rate limit exceeded
@@ -50,7 +57,8 @@ export async function queryRateLimit(
     // Add rate limit headers
     res.setHeader('X-RateLimit-Limit', maxRequests.toString());
     res.setHeader('X-RateLimit-Remaining', (maxRequests - count - 1).toString());
-    res.setHeader('X-RateLimit-Reset', (Date.now() + (await redisClient.ttl(rateLimitKey)) * 1000).toString());
+    const ttl = await redisClient.ttl(rateLimitKey);
+    res.setHeader('X-RateLimit-Reset', (Date.now() + ttl * 1000).toString());
 
     next();
   } catch (error: any) {

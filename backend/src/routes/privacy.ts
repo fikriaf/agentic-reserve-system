@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
+﻿import { Router, Request, Response } from 'express';
 import { Connection, Keypair } from '@solana/web3.js';
+import bs58 from 'bs58';
 import { getStealthAddressManager } from '../services/privacy/stealth-address-manager';
 import { getShieldedTransferBuilder } from '../services/privacy/shielded/shielded-transfer-builder';
 import { getPaymentScannerService } from '../services/privacy/scanning/payment-scanner-service';
@@ -48,7 +49,7 @@ function getCommitmentManager(): CommitmentManager {
     });
     const supabase = getSupabaseClient();
     const encryption = getEncryptionService();
-    commitmentManager = new CommitmentManager(sipherClient, supabase, encryption);
+    commitmentManager = new CommitmentManager(sipherClient, supabase.raw, encryption);
   }
   return commitmentManager;
 }
@@ -60,7 +61,7 @@ function getPrivacyAnalyzer(): PrivacyScoreAnalyzer {
       apiKey: config.sipher.apiKey
     });
     const supabase = getSupabaseClient();
-    privacyAnalyzer = new PrivacyScoreAnalyzer(sipherClient, supabase);
+    privacyAnalyzer = new PrivacyScoreAnalyzer(sipherClient, supabase.raw);
   }
   return privacyAnalyzer;
 }
@@ -84,7 +85,7 @@ function getMEVProtectionService(): MEVProtectionService {
       stealthMgr,
       privacyAn,
       jupiterClient,
-      supabase
+      supabase.raw
     );
   }
   return mevProtectionService;
@@ -251,7 +252,7 @@ router.post('/shielded-transfer/submit', async (req: Request, res: Response) => 
 
     // Decode sender keypair from private key
     const senderKeypair = Keypair.fromSecretKey(
-      Buffer.from(senderPrivateKey, 'base58')
+      bs58.decode(senderPrivateKey)
     );
 
     const transferBuilder = getShieldedTransferBuilder();

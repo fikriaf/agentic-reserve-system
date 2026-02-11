@@ -14,7 +14,7 @@
 import { getILICalculator } from '../services/ili-calculator';
 import { getPythClient } from '../services/oracles/pyth-client';
 import { getBirdeyeClient } from '../services/oracles/birdeye-client';
-import { getKaminoClient } from '../services/defi/kamino-client';
+import { getKaminoSDKClient } from '../services/defi/kamino-sdk-client';
 import { getMeteoraClient } from '../services/defi/meteora-client';
 import { getSupabaseClient } from '../services/supabase';
 
