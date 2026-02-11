@@ -21,7 +21,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies with clean install for reproducibility
-RUN npm ci --only=production && \
+RUN npm install --only=production && \
     npm cache clean --force
 
 # ============================================
@@ -37,7 +37,7 @@ COPY tsconfig.json ./
 COPY tsconfig.build.json ./
 
 # Install ALL dependencies (including devDependencies for build)
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY src ./src
