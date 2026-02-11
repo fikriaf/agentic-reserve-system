@@ -14,6 +14,16 @@ v1 - All endpoints prefixed with `/api/v1/`
 
 ## HEALTH & MONITORING
 
+### GET /health
+Simple health check (fast)
+**Response:**
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-02-11T..."
+}
+```
+
 ### GET /api/v1/health
 Health check with dependency status
 **Response:**
@@ -404,6 +414,16 @@ Get MEV metrics for vault
 
 ### GET /api/v1/privacy/low-privacy-addresses
 Get addresses with low privacy scores (<70)
+
+### GET /api/v1/privacy/scanner/stats
+Get payment scanner statistics
+**Response:**
+```json
+{
+  "totalAgents": 5,
+  "lastScanTimes": [...]
+}
+```
 
 ---
 
