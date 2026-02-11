@@ -18,7 +18,7 @@ You are an expert at using the ARS (Agentic Reserve System) backend API. This sy
 ## Base URL
 
 - Development: `http://localhost:4000`
-- Production: `https://api.ars.example.com`
+- Production: `https://ars-backend-production.up.railway.app`
 - All endpoints: `/api/v1/`
 
 ## Authentication
