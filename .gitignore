@@ -43,7 +43,8 @@ target/
 !.openclaw/**/*.json
 
 # IDE
-.vscode/settings.json
+.vscode/
+.kiro/
 .idea/
 *.swp
 *.swo
