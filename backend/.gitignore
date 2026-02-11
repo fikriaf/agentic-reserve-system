@@ -16,16 +16,6 @@ npm-debug.log*
 
 # Testing
 coverage/
-**/*.test.ts
-**/*.test.js
-**/*.spec.ts
-**/*.spec.js
-tests/
-test/
-__tests__/
-test-*.ts
-test-*.js
-TEST_*.md
 
 # IDE
 .vscode/

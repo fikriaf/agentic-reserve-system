@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Connection, Keypair, Transaction, sendAndConfirmTransaction, PublicKey } from '@solana/web3.js';
+import { Connection, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { getSipherClient, MetaAddress, StealthAddress } from '../sipher-client';
 import { getStealthAddressManager } from '../stealth-address-manager';
 import { supabase } from '../../supabase';
@@ -307,7 +307,7 @@ export class ShieldedTransferBuilder extends EventEmitter {
   private async validateBalance(senderId: string, amount: string): Promise<boolean> {
     try {
       // Get sender's SOL balance (for transaction fees)
-      const balance = await this.connection.getBalance(new PublicKey(senderId));
+      const balance = await this.connection.getBalance(senderId);
       
       // Minimum balance required for transaction fees (0.001 SOL = 1,000,000 lamports)
       const minBalance = 1_000_000;

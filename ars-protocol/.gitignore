@@ -1,31 +1,7 @@
-# Build artifacts
-target/
-**/*.rs.bk
-*.pdb
-
-# IDL
-target/idl/
-target/types/
-
-# Anchor
 .anchor
-test-ledger/
-
-# Node
-node_modules/
-dist/
-
-# Environment
-.env
-.env.local
-
-# OS
 .DS_Store
-Thumbs.db
-
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn

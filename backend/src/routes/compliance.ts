@@ -53,10 +53,10 @@ function initializeServices() {
   const encryption = getEncryptionService();
 
   // Initialize viewing key manager
-  initializeViewingKeyManager(sipherClient, supabase.raw, encryption);
+  initializeViewingKeyManager(sipherClient, supabase, encryption);
 
   // Initialize disclosure service
-  initializeDisclosureService(sipherClient, supabase.raw);
+  initializeDisclosureService(sipherClient, supabase);
 
   // Initialize compliance service
   const viewingKeyManager = getViewingKeyManager();
@@ -65,12 +65,12 @@ function initializeServices() {
     sipherClient,
     viewingKeyManager,
     disclosureService,
-    supabase.raw,
+    supabase,
     mockAMLService
   );
 
   // Initialize multi-sig service
-  initializeMultiSigService(supabase.raw);
+  initializeMultiSigService(supabase);
 
   servicesInitialized = true;
 }
@@ -98,13 +98,6 @@ function initializeServices() {
  */
 router.post('/viewing-key/generate', async (req: Request, res: Response) => {
   try {
-    if (!config.sipher.enabled) {
-      return res.status(503).json({
-        error: 'Sipher integration is disabled',
-        message: 'Compliance features require Sipher API to be enabled and configured'
-      });
-    }
-
     initializeServices();
 
     const { path = 'm/0' } = req.body;
@@ -262,13 +255,6 @@ router.post('/viewing-key/verify', async (req: Request, res: Response) => {
  */
 router.post('/disclose', async (req: Request, res: Response) => {
   try {
-    if (!config.sipher.enabled) {
-      return res.status(503).json({
-        error: 'Sipher integration is disabled',
-        message: 'Compliance features require Sipher API to be enabled and configured'
-      });
-    }
-
     initializeServices();
 
     const { transactionId, auditorId, role } = req.body;
@@ -444,13 +430,6 @@ router.post('/decrypt', async (req: Request, res: Response) => {
  */
 router.get('/disclosures/:auditorId', async (req: Request, res: Response) => {
   try {
-    if (!config.sipher.enabled) {
-      return res.status(503).json({
-        error: 'Sipher integration is disabled',
-        message: 'Compliance features require Sipher API to be enabled and configured'
-      });
-    }
-
     initializeServices();
 
     const { auditorId } = req.params;
@@ -743,13 +722,6 @@ router.get('/master-key/status/:requestId', async (req: Request, res: Response) 
  */
 router.post('/setup', async (req: Request, res: Response) => {
   try {
-    if (!config.sipher.enabled) {
-      return res.status(503).json({
-        error: 'Sipher integration is disabled',
-        message: 'Compliance features require Sipher API to be enabled and configured'
-      });
-    }
-
     initializeServices();
 
     const complianceService = getComplianceService();

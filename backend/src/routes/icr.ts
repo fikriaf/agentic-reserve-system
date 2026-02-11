@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../services/supabase';
-import { getCachedData, setCachedData } from '../services/upstash-redis';
+import { getCachedData, setCachedData } from '../services/redis';
 
 const router = Router();
 
@@ -26,11 +26,7 @@ router.get('/current', async (req: Request, res: Response) => {
     }
 
     if (!data || data.length === 0) {
-      // No ICR data in database - return empty response
-      return res.status(404).json({ 
-        error: 'No ICR data available',
-        message: 'ICR calculation has not been performed yet. Please run the ICR calculator service.'
-      });
+      return res.status(404).json({ error: 'No ICR data available' });
     }
 
     // Calculate weighted average ICR

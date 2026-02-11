@@ -120,7 +120,7 @@ export class DisclosureService {
         event_type: 'encryption',
         actor: auditorPublicKey,
         resource_type: 'disclosure',
-        resource_id: result.viewingKeyHash,
+        resource_id: result.keyHash,
         action: 'encrypt_transaction_data',
         result: 'success',
         metadata: {
@@ -132,14 +132,14 @@ export class DisclosureService {
       });
 
       logger.info('Transaction data encrypted successfully', {
-        viewingKeyHash: result.viewingKeyHash,
+        keyHash: result.keyHash,
         expiresAt
       });
 
       return {
-        encrypted: result.ciphertext,
-        keyHash: result.viewingKeyHash,
-        expiresAt: expiresAt
+        encrypted: result.encrypted,
+        keyHash: result.keyHash,
+        expiresAt: new Date(result.expiresAt)
       };
     } catch (error) {
       // Log failed encryption attempt
@@ -178,10 +178,9 @@ export class DisclosureService {
       });
 
       // Call Sipher API to decrypt data with viewing key
-      const encryptedData = typeof encrypted === 'string' ? JSON.parse(encrypted) : encrypted;
       const decrypted = await this.sipherClient.decrypt({
         viewingKey,
-        encrypted: encryptedData
+        encrypted
       });
 
       // Log successful decryption
@@ -282,14 +281,9 @@ export class DisclosureService {
 
       // Log revocation event
       await this.logDisclosureEvent({
-        event_type: 'revocation',
-        actor: 'system',
-        resource_type: 'disclosure',
-        resource_id: disclosureId.toString(),
-        action: 'revoke_disclosure',
-        result: 'success',
-        metadata: {},
-        timestamp: new Date().toISOString()
+        type: 'revocation',
+        disclosureId,
+        timestamp: new Date()
       });
 
       logger.info(`Disclosure revoked: ${disclosureId}`);

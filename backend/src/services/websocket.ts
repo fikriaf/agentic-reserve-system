@@ -83,7 +83,8 @@ export class WebSocketService {
 
   private setupSupabaseSubscriptions() {
     // Subscribe to ILI updates
-    supabase.raw.channel('ili_updates')
+    supabase
+      .channel('ili_updates')
       .on(
         'postgres_changes',
         {
@@ -109,7 +110,8 @@ export class WebSocketService {
       .subscribe();
 
     // Subscribe to proposal updates
-    supabase.raw.channel('proposal_updates')
+    supabase
+      .channel('proposal_updates')
       .on(
         'postgres_changes',
         {
@@ -132,7 +134,8 @@ export class WebSocketService {
       .subscribe();
 
     // Subscribe to reserve updates
-    supabase.raw.channel('reserve_updates')
+    supabase
+      .channel('reserve_updates')
       .on(
         'postgres_changes',
         {
@@ -154,7 +157,8 @@ export class WebSocketService {
       .subscribe();
 
     // Subscribe to revenue updates
-    supabase.raw.channel('revenue_updates')
+    supabase
+      .channel('revenue_updates')
       .on(
         'postgres_changes',
         {

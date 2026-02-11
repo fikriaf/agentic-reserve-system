@@ -81,8 +81,8 @@ export class SAKCoreManager implements ISAKCoreManager {
       this.isInitialized = true;
       logger.info('SAK Core Manager initialization completed successfully');
       
-    } catch (error: any) {
-      logger.error('Failed to initialize SAK Core Manager', error);
+    } catch (error) {
+      logger.error('Failed to initialize SAK Core Manager', { error });
       throw error;
     }
   }
@@ -115,8 +115,8 @@ export class SAKCoreManager implements ISAKCoreManager {
       
       logger.info('SAK Core Manager shutdown completed');
       
-    } catch (error: any) {
-      logger.error('Error during SAK Core Manager shutdown', error);
+    } catch (error) {
+      logger.error('Error during SAK Core Manager shutdown', { error });
       throw error;
     }
   }
@@ -134,13 +134,7 @@ export class SAKCoreManager implements ISAKCoreManager {
     try {
       logger.info('Loading SAK plugin', { pluginName });
       
-      await this.pluginManager.loadPlugin(pluginName);
-      
-      // Get the loaded plugin
-      const plugin = this.pluginManager.getPlugin(pluginName);
-      if (!plugin) {
-        throw new Error(`Plugin ${pluginName} not found after loading`);
-      }
+      const plugin = await this.pluginManager.loadPlugin(pluginName);
       
       // Update metrics
       this.metrics.plugins[pluginName] = {
@@ -154,8 +148,8 @@ export class SAKCoreManager implements ISAKCoreManager {
       logger.info('SAK plugin loaded successfully', { pluginName, status: plugin.status });
       return plugin;
       
-    } catch (error: any) {
-      logger.error('Failed to load SAK plugin', error, { pluginName });
+    } catch (error) {
+      logger.error('Failed to load SAK plugin', { pluginName, error });
       throw error;
     }
   }
@@ -180,8 +174,8 @@ export class SAKCoreManager implements ISAKCoreManager {
       
       logger.info('SAK plugin unloaded successfully', { pluginName });
       
-    } catch (error: any) {
-      logger.error('Failed to unload SAK plugin', error, { pluginName });
+    } catch (error) {
+      logger.error('Failed to unload SAK plugin', { pluginName, error });
       throw error;
     }
   }
@@ -242,9 +236,10 @@ export class SAKCoreManager implements ISAKCoreManager {
       
       return agent;
       
-    } catch (error: any) {
-      logger.error('Failed to create SAK agent instance', error, { 
-        agentId: agentConfig.agentId
+    } catch (error) {
+      logger.error('Failed to create SAK agent instance', { 
+        agentId: agentConfig.agentId, 
+        error 
       });
       throw error;
     }
@@ -402,8 +397,8 @@ export class SAKCoreManager implements ISAKCoreManager {
         rpcUrl: this.config?.core.rpcUrl,
         version: version['solana-core']
       });
-    } catch (error: any) {
-      logger.error('SAK connection test failed', error);
+    } catch (error) {
+      logger.error('SAK connection test failed', { error });
       throw new Error(`Failed to connect to Solana RPC: ${error}`);
     }
   }
@@ -428,8 +423,8 @@ export class SAKCoreManager implements ISAKCoreManager {
         // Check for alerts
         this.checkAlertThresholds(health);
         
-      } catch (error: any) {
-        logger.error('Error during SAK health check', error);
+      } catch (error) {
+        logger.error('Error during SAK health check', { error });
       }
     }, this.config.monitoring.healthCheckInterval);
   }

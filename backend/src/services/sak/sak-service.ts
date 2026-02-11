@@ -60,8 +60,8 @@ export class SAKService {
       this.isInitialized = true;
       logger.info('SAK Service initialization completed successfully');
 
-    } catch (error: any) {
-      logger.error('Failed to initialize SAK Service', error);
+    } catch (error) {
+      logger.error('Failed to initialize SAK Service', { error });
       throw error;
     }
   }
@@ -83,8 +83,8 @@ export class SAKService {
 
       logger.info('SAK Service shutdown completed');
 
-    } catch (error: any) {
-      logger.error('Error during SAK Service shutdown', error);
+    } catch (error) {
+      logger.error('Error during SAK Service shutdown', { error });
       throw error;
     }
   }
@@ -149,8 +149,8 @@ export class SAKService {
 
       logger.info('SAK Service reload completed successfully');
 
-    } catch (error: any) {
-      logger.error('Failed to reload SAK Service', error);
+    } catch (error) {
+      logger.error('Failed to reload SAK Service', { error });
       throw error;
     }
   }

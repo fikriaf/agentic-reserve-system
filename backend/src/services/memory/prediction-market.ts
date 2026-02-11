@@ -1,5 +1,5 @@
 import { supabase } from '../supabase';
-import { getUpstashRedis } from '../upstash-redis';
+import { getRedisClient } from '../redis';
 
 /**
  * Prediction Market Service
@@ -60,15 +60,12 @@ export class PredictionMarketService {
    */
   async getPredictionMarket(marketAddress: string): Promise<PredictionMarket | null> {
     // Check cache first
-    const redisClient = getUpstashRedis();
+    const redisClient = await getRedisClient();
     const cacheKey = `market:${marketAddress}:current`;
+    const cached = await redisClient.get(cacheKey);
     
-    if (redisClient) {
-      const cached = await redisClient.get<string>(cacheKey);
-      if (cached) {
-        const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached;
-        return parsed as PredictionMarket;
-      }
+    if (cached) {
+      return JSON.parse(cached);
     }
 
     // Query from database
@@ -109,9 +106,7 @@ export class PredictionMarketService {
     };
 
     // Cache for 5 minutes
-    if (redisClient) {
-      await redisClient.setex(cacheKey, 300, JSON.stringify(market));
-    }
+    await redisClient.setex(cacheKey, 300, JSON.stringify(market));
 
     return market;
   }
@@ -130,15 +125,11 @@ export class PredictionMarketService {
     fromTimestamp: number
   ): Promise<MarketSnapshot[]> {
     // Check cache first
-    const redisClient = getUpstashRedis();
     const cacheKey = `market:${marketAddress}:history:${fromTimestamp}`;
+    const cached = await redisClient.get(cacheKey);
     
-    if (redisClient) {
-      const cached = await redisClient.get<string>(cacheKey);
-      if (cached) {
-        const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached;
-        return parsed as MarketSnapshot[];
-      }
+    if (cached) {
+      return JSON.parse(cached);
     }
 
     // Query from database
@@ -161,9 +152,7 @@ export class PredictionMarketService {
     }));
 
     // Cache for 5 minutes
-    if (redisClient) {
-      await redisClient.setex(cacheKey, 300, JSON.stringify(snapshots));
-    }
+    await redisClient.setex(cacheKey, 300, JSON.stringify(snapshots));
 
     return snapshots;
   }
@@ -298,11 +287,8 @@ export class PredictionMarketService {
     if (snapshotError) throw snapshotError;
 
     // Invalidate cache
-    const redisClient = getUpstashRedis();
-    if (redisClient) {
-      await redisClient.del(`market:${resolution.marketAddress}:current`);
-      await redisClient.del(`market:${resolution.marketAddress}:history:*`);
-    }
+    await redisClient.del(`market:${resolution.marketAddress}:current`);
+    await redisClient.del(`market:${resolution.marketAddress}:history:*`);
 
     console.log(`Market ${resolution.marketAddress} resolved with outcome: ${resolution.finalOutcome}`);
   }
@@ -362,10 +348,7 @@ export class PredictionMarketService {
     if (snapshotError) throw snapshotError;
 
     // Invalidate cache
-    const redisClient = getUpstashRedis();
-    if (redisClient) {
-      await redisClient.del(`market:${marketAddress}:current`);
-    }
+    await redisClient.del(`market:${marketAddress}:current`);
 
     console.log(`Market ${marketAddress} updated with confidence score: ${confidenceScore}`);
   }

@@ -1,4 +1,4 @@
-﻿import http from 'http';
+import http from 'http';
 import { createApp } from './app';
 import { WebSocketService } from './services/websocket';
 import { PolicyExecutor } from './services/policy-executor';
@@ -11,86 +11,81 @@ async function startServer() {
     const app = createApp();
     const server = http.createServer(app);
 
-    // Start server first so health check can respond
-    server.listen(config.port, () => {
-      console.log(`🚀 ARS Backend API running on port ${config.port}`);
-      console.log(`📊 Environment: ${config.nodeEnv}`);
-      console.log(`✅ Health check available at /health`);
-    });
-
-    // Initialize services asynchronously (don't block server start)
-    initializeServices(server).catch(err => {
-      console.error('⚠️  Service initialization failed (non-fatal):', err.message);
-    });
-
-    // Graceful shutdown
-    const shutdown = async () => {
-      console.log('Shutdown signal received: closing HTTP server');
-      server.close(() => {
-        console.log('HTTP server closed');
-        process.exit(0);
-      });
-    };
-
-    process.on('SIGTERM', shutdown);
-    process.on('SIGINT', shutdown);
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-}
-
-async function initializeServices(server: http.Server) {
-  try {
     // Initialize SAK service
     if (config.sak.enabled) {
       console.log('🔧 Initializing Solana Agent Kit (SAK) integration...');
-      try {
-        await sakService.initialize();
-        console.log('✅ SAK integration initialized successfully');
-      } catch (err: any) {
-        console.error('⚠️  SAK initialization failed:', err.message);
-      }
+      await sakService.initialize();
+      console.log('✅ SAK integration initialized successfully');
     } else {
       console.log('⚠️  SAK integration is disabled');
     }
 
-    // Initialize WebSocket service with the actual HTTP server
-    try {
-      const wsService = new WebSocketService(server);
-      console.log('✅ WebSocket service initialized');
-    } catch (err: any) {
-      console.error('⚠️  WebSocket initialization failed:', err.message);
-    }
+    // Initialize WebSocket service
+    const wsService = new WebSocketService(server);
 
     // Initialize Policy Executor
-    try {
-      const policyExecutor = new PolicyExecutor();
-      policyExecutor.start();
-      console.log('✅ Policy executor started');
-    } catch (err: any) {
-      console.error('⚠️  Policy executor failed:', err.message);
-    }
+    const policyExecutor = new PolicyExecutor();
+    policyExecutor.start();
 
     // Run initial ILI and ICR calculations
-    try {
-      await runInitialUpdates();
-      console.log('✅ Initial data updates completed');
-    } catch (err: any) {
-      console.error('⚠️  Initial updates failed:', err.message);
-    }
+    await runInitialUpdates();
 
     // Initialize cron jobs for scheduled updates
-    try {
-      initializeCronJobs();
-      console.log('✅ Cron jobs initialized');
-    } catch (err: any) {
-      console.error('⚠️  Cron jobs failed:', err.message);
-    }
+    initializeCronJobs();
 
-    console.log('🎉 All services initialized');
-  } catch (error: any) {
-    console.error('Service initialization error:', error.message);
+    server.listen(config.port, () => {
+      console.log(`🚀 ARS Backend API running on port ${config.port}`);
+      console.log(`📊 Environment: ${config.nodeEnv}`);
+      console.log(`🔌 WebSocket server available at ws://localhost:${config.port}/ws`);
+      console.log(`🏛️ Policy executor monitoring proposals`);
+      console.log(`⏰ Cron jobs active: ILI (5min), ICR (10min)`);
+      
+      // SAK status
+      if (config.sak.enabled) {
+        const sakStatus = sakService.getStatus();
+        console.log(`🤖 SAK integration: ${sakStatus.healthy ? '✅ Healthy' : '❌ Unhealthy'} (${sakStatus.pluginCount} plugins)`);
+      }
+    });
+
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM signal received: closing HTTP server');
+      policyExecutor.stop();
+      wsService.close();
+      
+      // Shutdown SAK service
+      if (config.sak.enabled) {
+        console.log('🔧 Shutting down SAK integration...');
+        await sakService.shutdown();
+        console.log('✅ SAK integration shutdown completed');
+      }
+      
+      server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+      });
+    });
+
+    process.on('SIGINT', async () => {
+      console.log('SIGINT signal received: closing HTTP server');
+      policyExecutor.stop();
+      wsService.close();
+      
+      // Shutdown SAK service
+      if (config.sak.enabled) {
+        console.log('🔧 Shutting down SAK integration...');
+        await sakService.shutdown();
+        console.log('✅ SAK integration shutdown completed');
+      }
+      
+      server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+      });
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
   }
 }
 

@@ -39,9 +39,10 @@ export class PluginManager implements IPluginManager {
       for (const pluginName of enabledPlugins) {
         try {
           await this.loadPlugin(pluginName);
-        } catch (error: any) {
-          logger.error('Failed to load plugin during initialization', error, { 
-            pluginName
+        } catch (error) {
+          logger.error('Failed to load plugin during initialization', { 
+            pluginName, 
+            error 
           });
           // Continue loading other plugins even if one fails
         }
@@ -52,8 +53,8 @@ export class PluginManager implements IPluginManager {
         loadedPlugins: Array.from(this.plugins.keys())
       });
       
-    } catch (error: any) {
-      logger.error('Failed to initialize Plugin Manager', error);
+    } catch (error) {
+      logger.error('Failed to initialize Plugin Manager', { error });
       throw error;
     }
   }
@@ -70,16 +71,19 @@ export class PluginManager implements IPluginManager {
       for (const pluginName of pluginNames) {
         try {
           await this.unloadPlugin(pluginName);
-        } catch (error: any) {
-          logger.error('Error unloading plugin during shutdown', error, { pluginName });
+        } catch (error) {
+          logger.error('Error unloading plugin during shutdown', { 
+            pluginName, 
+            error 
+          });
         }
       }
       
       this.isInitialized = false;
       logger.info('Plugin Manager shutdown completed');
       
-    } catch (error: any) {
-      logger.error('Error during Plugin Manager shutdown', error);
+    } catch (error) {
+      logger.error('Error during Plugin Manager shutdown', { error });
       throw error;
     }
   }
@@ -87,7 +91,7 @@ export class PluginManager implements IPluginManager {
   /**
    * Load a specific plugin
    */
-  async loadPlugin(name: string, config?: PluginSettings): Promise<void> {
+  async loadPlugin(name: string, config?: PluginSettings): Promise<SAKPlugin> {
     try {
       logger.info('Loading plugin', { name });
       
@@ -95,7 +99,7 @@ export class PluginManager implements IPluginManager {
       const existingPlugin = this.plugins.get(name);
       if (existingPlugin && existingPlugin.status === PluginStatus.LOADED) {
         logger.info('Plugin already loaded', { name });
-        return; // Already loaded, nothing to do
+        return existingPlugin;
       }
       
       // Get plugin configuration
@@ -134,10 +138,10 @@ export class PluginManager implements IPluginManager {
         priority: plugin.priority
       });
       
-      // Plugin loaded successfully (void return)
+      return plugin;
       
-    } catch (error: any) {
-      logger.error('Failed to load plugin', error, { name });
+    } catch (error) {
+      logger.error('Failed to load plugin', { name, error });
       
       // Update plugin status to error
       const plugin = this.plugins.get(name);
@@ -180,8 +184,8 @@ export class PluginManager implements IPluginManager {
       
       logger.info('Plugin unloaded successfully', { name });
       
-    } catch (error: any) {
-      logger.error('Failed to unload plugin', error, { name });
+    } catch (error) {
+      logger.error('Failed to unload plugin', { name, error });
       
       // Update plugin status to error
       const plugin = this.plugins.get(name);
@@ -206,8 +210,8 @@ export class PluginManager implements IPluginManager {
       
       logger.info('Plugin reloaded successfully', { name });
       
-    } catch (error: any) {
-      logger.error('Failed to reload plugin', error, { name });
+    } catch (error) {
+      logger.error('Failed to reload plugin', { name, error });
       throw error;
     }
   }
@@ -275,12 +279,13 @@ export class PluginManager implements IPluginManager {
         pluginUsed: pluginName
       };
       
-    } catch (error: any) {
+    } catch (error) {
       const executionTime = Date.now() - startTime;
       
-      logger.error('Plugin operation failed', error, {
+      logger.error('Plugin operation failed', {
         pluginName,
         operation,
+        error,
         executionTime
       });
       
@@ -351,7 +356,7 @@ export class PluginManager implements IPluginManager {
       
       // Resolve conflicts after priority change
       this.resolvePluginConflicts().catch(error => {
-        logger.error('Error resolving conflicts after priority change', error);
+        logger.error('Error resolving conflicts after priority change', { error });
       });
     } else {
       logger.warn('Plugin not found for priority update', { pluginName });

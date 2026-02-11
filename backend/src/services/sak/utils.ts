@@ -32,20 +32,20 @@ export function validateSAKConfiguration(config: SAKConfig): boolean {
     }
     
     if (!['mainnet', 'devnet', 'testnet'].includes(config.core.network)) {
-      logger.error('Invalid SAK network', undefined, { network: config.core.network });
+      logger.error('Invalid SAK network', { network: config.core.network });
       return false;
     }
     
     if (!['processed', 'confirmed', 'finalized'].includes(config.core.commitment)) {
-      logger.error('Invalid SAK commitment', undefined, { commitment: config.core.commitment });
+      logger.error('Invalid SAK commitment', { commitment: config.core.commitment });
       return false;
     }
     
     logger.info('SAK configuration validation passed');
     return true;
     
-  } catch (error: any) {
-    logger.error('Error validating SAK configuration', error);
+  } catch (error) {
+    logger.error('Error validating SAK configuration', { error });
     return false;
   }
 }
@@ -107,9 +107,10 @@ export async function createAgentInstance(
     
     return agent;
     
-  } catch (error: any) {
-    logger.error('Failed to create SAK agent instance', error, {
-      agentId: agentConfig.agentId
+  } catch (error) {
+    logger.error('Failed to create SAK agent instance', {
+      agentId: agentConfig.agentId,
+      error
     });
     throw error;
   }

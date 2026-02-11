@@ -1,6 +1,6 @@
-import { getKaminoSDKClient } from './defi/kamino-sdk-client';
+import { getKaminoClient } from './defi/kamino-client';
 import { getSupabaseClient } from './supabase';
-import { getUpstashRedis } from './upstash-redis';
+import { getRedisClient } from './redis';
 
 interface ICRData {
   protocol: string;
@@ -37,7 +37,7 @@ export class ICRCalculator {
 
   constructor() {
     this.supabase = getSupabaseClient();
-    this.redis = getUpstashRedis();
+    this.redis = getRedisClient();
     console.log('✅ ICR Calculator initialized');
   }
 
@@ -103,20 +103,22 @@ export class ICRCalculator {
     const rates: ICRData[] = [];
 
     try {
-      // Kamino Finance (prioritized - largest TVL) - REAL DATA from SDK
-      const kamino = getKaminoSDKClient();
-      const market = await kamino.getMarket();
+      // Kamino Finance (prioritized - largest TVL)
+      const kamino = getKaminoClient();
+      const markets = await kamino.getMarkets();
 
-      if (market.borrowAPY > 0 && market.totalBorrow > 0) {
-        rates.push({
-          protocol: 'kamino',
-          rate: market.borrowAPY * 100, // Convert to basis points
-          tvl: market.totalBorrow,
-          weight: 0 // Will be calculated later
-        });
+      for (const market of markets) {
+        if (market.borrowApy > 0 && market.totalBorrow > 0) {
+          rates.push({
+            protocol: 'kamino',
+            rate: market.borrowApy * 100, // Convert to basis points
+            tvl: market.totalBorrow,
+            weight: 0 // Will be calculated later
+          });
+        }
       }
 
-      console.log(`✅ Kamino: 1 market (Main Market)`);
+      console.log(`✅ Kamino: ${rates.length} markets`);
     } catch (error) {
       console.warn('⚠️ Kamino data unavailable:', error);
     }
@@ -217,11 +219,6 @@ export class ICRCalculator {
    */
   private async cacheCurrentICR(snapshot: ICRSnapshot): Promise<void> {
     try {
-      if (!this.redis) {
-        console.warn('⚠️ Redis not available, skipping cache');
-        return;
-      }
-
       await this.redis.setex(
         this.REDIS_KEY,
         this.REDIS_TTL,
@@ -246,19 +243,17 @@ export class ICRCalculator {
   async getCurrentICR(): Promise<ICRSnapshot> {
     try {
       // Try cache first
-      if (this.redis) {
-        const cached = await this.redis.get(this.REDIS_KEY);
-        
-        if (cached) {
-          const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
-          console.log('✅ ICR retrieved from cache');
-          return {
-            timestamp: new Date(data.timestamp),
-            icrValue: data.icrValue,
-            confidenceInterval: data.confidenceInterval,
-            sources: data.sources
-          };
-        }
+      const cached = await this.redis.get(this.REDIS_KEY);
+      
+      if (cached) {
+        const data = JSON.parse(cached);
+        console.log('✅ ICR retrieved from cache');
+        return {
+          timestamp: new Date(data.timestamp),
+          icrValue: data.icrValue,
+          confidenceInterval: data.confidenceInterval,
+          sources: data.sources
+        };
       }
     } catch (error) {
       console.warn('⚠️ Cache retrieval failed:', error);

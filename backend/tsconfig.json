@@ -5,37 +5,13 @@
     "lib": ["ES2020"],
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "noEmitOnError": false
+    "moduleResolution": "node"
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "src/services/agent-swarm/**/*",
-    "src/services/helius-client.ts",
-    "src/services/helius/**/*",
-    "src/services/staking/**/*",
-    "src/services/defi/kamino-client-real.ts",
-    "src/services/defi/lulo-client.ts",
-    "src/services/memory/lys-labs-client.ts",
-    "src/services/memory/graceful-degradation.ts",
-    "src/services/memory/monitoring.ts",
-    "src/services/memory/resilient-cache.ts",
-    "src/services/memory/transaction-indexer.ts",
-    "src/services/memory/wallet-registration.ts",
-    "src/services/memory/index.ts",
-    "src/services/privacy/**/*",
-    "src/services/payment/**/*",
-    "src/services/oracles/birdeye-client.ts",
-    "src/services/oracles/pyth-client.ts",
-    "src/services/oracles/switchboard-client.ts"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

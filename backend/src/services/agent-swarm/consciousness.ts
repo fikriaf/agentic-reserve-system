@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { getOpenRouterClient } from '../ai/openrouter-client';
-import { getUpstashRedis } from '../upstash-redis';
+import { getRedisClient } from '../redis';
 import * as crypto from 'crypto';
 
 interface AgentIdentity {

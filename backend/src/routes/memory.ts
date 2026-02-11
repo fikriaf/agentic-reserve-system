@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../services/supabase';
-import { getUpstashRedis } from '../services/upstash-redis';
+import { redisClient } from '../services/redis';
 import crypto from 'crypto';
 import { checkPrivacyAuthorization } from '../middleware/privacy-auth';
 import { queryRateLimit } from '../middleware/query-rate-limit';
@@ -32,21 +32,16 @@ async function cacheFirst<T>(
 ): Promise<T> {
   try {
     // Check cache
-    const redisClient = getUpstashRedis();
-    if (redisClient) {
-      const cached = await redisClient.get(cacheKey);
-      if (cached) {
-        return (typeof cached === 'string' ? JSON.parse(cached) : cached) as T;
-      }
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
     }
 
     // Cache miss - query database
     const result = await queryFn();
 
     // Store in cache
-    if (redisClient) {
-      await redisClient.setex(cacheKey, CACHE_TTL, JSON.stringify(result));
-    }
+    await redisClient.setex(cacheKey, CACHE_TTL, JSON.stringify(result));
 
     return result;
   } catch (error) {
@@ -121,19 +116,6 @@ router.get('/transactions/:walletAddress', checkPrivacyAuthorization, async (req
 
       const { data, error, count } = await query;
 
-      // Handle missing table gracefully
-      if (error && error.message.includes('Could not find the table')) {
-        return {
-          transactions: [],
-          pagination: {
-            page: pageNum,
-            pageSize: pageSizeNum,
-            total: 0,
-            totalPages: 0,
-          },
-        };
-      }
-
       if (error) throw error;
 
       return {
@@ -202,16 +184,6 @@ router.get('/pnl/:walletAddress', checkPrivacyAuthorization, async (req: Request
         .eq('wallet_address', walletAddress)
         .order('snapshot_time', { ascending: false })
         .limit(1);
-
-      // Handle missing table gracefully
-      if (error && error.message.includes('Could not find the table')) {
-        return {
-          realizedPnl: 0,
-          unrealizedPnl: 0,
-          totalPnl: 0,
-          tokens: [],
-        };
-      }
 
       if (error) throw error;
 
@@ -347,16 +319,6 @@ router.get('/portfolio/:walletAddress', checkPrivacyAuthorization, async (req: R
         .select('*')
         .eq('wallet_address', walletAddress);
 
-      // Handle missing table gracefully
-      if (balancesError && balancesError.message.includes('Could not find the table')) {
-        return {
-          walletAddress,
-          totalValue: 0,
-          balances: [],
-          pnl: null,
-        };
-      }
-
       if (balancesError) throw balancesError;
 
       // Get latest PnL
@@ -367,10 +329,7 @@ router.get('/portfolio/:walletAddress', checkPrivacyAuthorization, async (req: R
         .order('snapshot_time', { ascending: false })
         .limit(1);
 
-      // Ignore pnl error if table doesn't exist
-      if (pnlError && !pnlError.message.includes('Could not find the table')) {
-        throw pnlError;
-      }
+      if (pnlError) throw pnlError;
 
       const pnl = pnlData?.[0];
 

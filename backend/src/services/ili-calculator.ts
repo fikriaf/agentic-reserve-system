@@ -1,9 +1,9 @@
-// import { getOracleAggregator } from './oracles/oracle-aggregator';
+import { getOracleAggregator } from './oracles/oracle-aggregator';
 import { getJupiterClient } from './defi/jupiter-client';
 import { getMeteoraClient } from './defi/meteora-client';
-import { getKaminoSDKClient } from './defi/kamino-sdk-client';
+import { getKaminoClient } from './defi/kamino-client';
 import { getSupabaseClient } from './supabase';
-import { getUpstashRedis } from './upstash-redis';
+import { getRedisClient } from './redis';
 
 interface ILIComponents {
   avgYield: number;        // Average APY across protocols (%)
@@ -45,7 +45,7 @@ export class ILICalculator {
 
   constructor() {
     this.supabase = getSupabaseClient();
-    this.redis = getUpstashRedis();
+    this.redis = getRedisClient();
     console.log('✅ ILI Calculator initialized');
   }
 
@@ -126,17 +126,19 @@ export class ILICalculator {
     const yields: Array<{ apy: number; tvl: number; source: string }> = [];
 
     try {
-      // Kamino Finance lending rates - REAL DATA from SDK
-      const kamino = getKaminoSDKClient();
-      const kaminoMarket = await kamino.getMarket();
+      // Kamino Finance lending rates
+      const kamino = getKaminoClient();
+      const kaminoMarkets = await kamino.getMarkets();
       
-      if (kaminoMarket.supplyAPY > 0) {
-        yields.push({
-          apy: kaminoMarket.supplyAPY,
-          tvl: kaminoMarket.totalSupply,
-          source: 'kamino'
-        });
-        sources.push('kamino');
+      for (const market of kaminoMarkets) {
+        if (market.supplyAPY > 0) {
+          yields.push({
+            apy: market.supplyAPY,
+            tvl: market.totalSupply,
+            source: 'kamino'
+          });
+          sources.push('kamino');
+        }
       }
     } catch (error) {
       console.warn('⚠️ Kamino data unavailable:', error);
@@ -197,8 +199,8 @@ export class ILICalculator {
     let totalTvl = 0;
 
     try {
-      // Kamino Finance TVL - REAL DATA from SDK
-      const kamino = getKaminoSDKClient();
+      // Kamino Finance TVL
+      const kamino = getKaminoClient();
       const kaminoTvl = await kamino.getTotalTVL();
       totalTvl += kaminoTvl;
       sources.push('kamino');
@@ -290,11 +292,6 @@ export class ILICalculator {
    */
   private async cacheCurrentILI(snapshot: ILISnapshot): Promise<void> {
     try {
-      if (!this.redis) {
-        console.warn('⚠️ Redis not available, skipping cache');
-        return;
-      }
-
       await this.redis.setex(
         this.REDIS_KEY,
         this.REDIS_TTL,
@@ -321,21 +318,19 @@ export class ILICalculator {
   async getCurrentILI(): Promise<ILISnapshot> {
     try {
       // Try cache first
-      if (this.redis) {
-        const cached = await this.redis.get(this.REDIS_KEY);
-        
-        if (cached) {
-          const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
-          console.log('✅ ILI retrieved from cache');
-          return {
-            timestamp: new Date(data.timestamp),
-            iliValue: data.iliValue,
-            avgYield: data.avgYield,
-            volatility: data.volatility,
-            tvl: data.tvl,
-            sources: data.sources
-          };
-        }
+      const cached = await this.redis.get(this.REDIS_KEY);
+      
+      if (cached) {
+        const data = JSON.parse(cached);
+        console.log('✅ ILI retrieved from cache');
+        return {
+          timestamp: new Date(data.timestamp),
+          iliValue: data.iliValue,
+          avgYield: data.avgYield,
+          volatility: data.volatility,
+          tvl: data.tvl,
+          sources: data.sources
+        };
       }
     } catch (error) {
       console.warn('⚠️ Cache retrieval failed:', error);

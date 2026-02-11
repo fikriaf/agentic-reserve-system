@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../services/supabase';
-import { getCachedData, setCachedData } from '../services/upstash-redis';
+import { getCachedData, setCachedData } from '../services/redis';
 
 const router = Router();
 

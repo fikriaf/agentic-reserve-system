@@ -128,7 +128,7 @@ export class PaymentScannerService extends EventEmitter {
   /**
    * Scan for payments for all registered agents
    */
-  public async scanAllAgents(): Promise<void> {
+  private async scanAllAgents(): Promise<void> {
     if (this.isScanning) {
       logger.warn('Scan already in progress, skipping');
       return;

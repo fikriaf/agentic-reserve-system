@@ -30,8 +30,8 @@ export async function checkPrivacyAuthorization(
       .single();
 
     if (error) {
-      // Wallet not registered - allow access (public wallet)
-      next();
+      // Don't reveal if wallet exists or not - return generic auth error
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
@@ -45,19 +45,24 @@ export async function checkPrivacyAuthorization(
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'Unauthorized - Privacy-protected wallet requires authorization' });
+      // Don't reveal wallet exists - return generic auth error
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
     const token = authHeader.substring(7);
+    
+    // Verify token (simplified - in production, use JWT verification)
+    // For now, check if token matches the agent_id that registered the wallet
     const agentId = req.headers['x-agent-id'] as string;
     
     if (!agentId || agentId !== registration.agent_id) {
-      res.status(401).json({ error: 'Unauthorized - Invalid agent credentials' });
+      // Don't reveal wallet exists - return generic auth error
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
-    // Log audit trail
+    // Log audit trail for privacy-protected access
     await supabase.from('wallet_audit_trail').insert({
       wallet_address: walletAddress,
       action_type: 'query',
@@ -70,10 +75,12 @@ export async function checkPrivacyAuthorization(
       timestamp: Date.now(),
     });
 
+    // Authorization successful
     next();
   } catch (error: any) {
     console.error('Privacy authorization error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    // Don't reveal details - return generic auth error
+    res.status(401).json({ error: 'Unauthorized' });
   }
 }
 

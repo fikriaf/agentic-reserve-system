@@ -27,7 +27,6 @@ REGISTRATION_SUCCESS.md
 
 # Rust build artifacts
 target/
-**/target/
 **/*.rs.bk
 *.pdb
 
@@ -43,8 +42,7 @@ target/
 !.openclaw/**/*.json
 
 # IDE
-.vscode/
-.kiro/
+.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -59,19 +57,3 @@ target/
 tmp/
 temp/
 *.tmp
-
-# Test files
-**/*test*.ts
-**/*test*.js
-**/*.test.ts
-**/*.test.js
-**/*.spec.ts
-**/*.spec.js
-**/tests/
-**/test/
-**/__tests__/
-test-*.ts
-test-*.js
-TEST_*.md
-**/TEST_*.md
-

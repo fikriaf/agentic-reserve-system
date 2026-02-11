@@ -12,7 +12,7 @@ const router = Router();
  * Returns metrics in Prometheus text format
  * Requirement 15.1
  */
-router.get('/metrics', (req: Request, res: Response) => {
+router.get('/', (req: Request, res: Response) => {
   try {
     const prometheusFormat = metricsService.exportPrometheus();
     res.set('Content-Type', 'text/plain; version=0.0.4');
@@ -24,10 +24,10 @@ router.get('/metrics', (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/v1/metrics/json
+ * GET /metrics/json
  * JSON metrics endpoint (for debugging)
  */
-router.get('/api/v1/metrics/json', (req: Request, res: Response) => {
+router.get('/json', (req: Request, res: Response) => {
   try {
     const metrics = metricsService.exportJSON();
     

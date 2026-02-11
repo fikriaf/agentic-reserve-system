@@ -1,7 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
 import { config } from './config';
 import { metricsMiddleware } from './middleware/metrics-middleware';
 import { 
@@ -21,7 +20,6 @@ import agentRoutes from './routes/agents';
 import privacyRoutes from './routes/privacy';
 import complianceRoutes from './routes/compliance';
 import memoryRoutes from './routes/memory';
-import programsRoutes from './routes/programs';
 import healthRoutes from './routes/health';
 import metricsRoutes from './routes/metrics';
 import slowQueriesRoutes from './routes/slow-queries';
@@ -49,25 +47,9 @@ export function createApp(): Application {
   app.use('/api/', limiter);
 
   // Health check
-  // Removed - now handled by health routes
-
-  // Serve static agent files (for AI agent discovery)
-  app.get('/ars-llms.txt', (req, res) => {
-    res.setHeader('Content-Type', 'text/plain');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.sendFile(path.join(__dirname, '../ars-llms.txt'));
-  });
-
-  app.get('/SKILL.md', (req, res) => {
-    res.setHeader('Content-Type', 'text/markdown');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.sendFile(path.join(__dirname, '../SKILL.md'));
-  });
-
-  app.get('/HEARTBEAT.md', (req, res) => {
-    res.setHeader('Content-Type', 'text/markdown');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.sendFile(path.join(__dirname, '../HEARTBEAT.md'));
+  app.get('/health', (req, res) => {
+    logger.info('Health check requested', { requestId: req.requestId });
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
   // API routes
@@ -79,22 +61,23 @@ export function createApp(): Application {
   app.use('/api/v1/agents', agentRoutes);
   
   // Privacy routes (Phase 1 & 2: Shielded Transfers, MEV Protection)
-  app.use('/api/v1/privacy', privacyRoutes);
+  if (config.privacy?.enabled) {
+    app.use('/api/v1/privacy', privacyRoutes);
+  }
 
   // Compliance routes (Phase 3: Compliance Layer)
-  app.use('/api/v1/compliance', complianceRoutes);
+  if (config.privacy?.enabled) {
+    app.use('/api/v1/compliance', complianceRoutes);
+  }
 
   // Memory routes (Solder Cortex integration)
   app.use('/api/v1/memory', memoryRoutes);
 
-  // Programs routes (Solana smart contracts)
-  app.use('/api/v1/programs', programsRoutes);
-
   // Health check routes
-  app.use('/', healthRoutes);
+  app.use('/api/v1/health', healthRoutes);
 
   // Metrics endpoint (Prometheus)
-  app.use('/', metricsRoutes);
+  app.use('/metrics', metricsRoutes);
 
   // Slow queries endpoint
   app.use('/api/v1/slow-queries', slowQueriesRoutes);
