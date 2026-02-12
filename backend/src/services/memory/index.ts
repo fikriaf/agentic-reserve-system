@@ -51,7 +51,10 @@ export async function initializeMemoryService(): Promise<void> {
 
   try {
     // Initialize components
-    const lysClient = new LYSLabsClient();
+    const lysClient = new LYSLabsClient(
+      process.env.LYS_LABS_URL || 'https://api.lyslabs.io',
+      process.env.LYS_LABS_API_KEY || ''
+    );
     const indexer = new TransactionIndexer();
     const registrationManager = new WalletRegistrationManager();
 
